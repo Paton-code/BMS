@@ -213,7 +213,17 @@
     <div class="book-detail-container">
         <div class="book-header">
             <div>
-                <img th:src="${book.getCoverImageUrl()}" alt="图书封面" class="book-cover">
+                <img th:src="${book.getCoverImageUrl()}" alt="图书封面" class="book-cover" id="bookCoverImg">
+                <div style="text-align:center;margin-top:10px;">
+                    <label class="btn btn-edit" style="padding:6px 16px;font-size:13px;cursor:pointer;">
+                        <input type="file" id="coverFileInput" accept="image/*"
+                               style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+                        修改封面
+                    </label>
+                </div>
+                <div style="text-align:center;margin-top:6px;">
+                    <span id="coverUploadStatus" style="display:none;font-size:12px;color:#28a745;"></span>
+                </div>
             </div>
 
             <div class="book-basic-info">

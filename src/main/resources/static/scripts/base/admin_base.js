@@ -124,7 +124,7 @@ $(document).ready(function () {
                 var updates = JSON.parse(pending);
                 for (var bookId in updates) {
                     var newStock = updates[bookId];
-                    var $card = $('#bookResultArea').find('a[href*="bookId="]').filter(function() {
+                    var $card = $('#bookResultArea').find('a[href*="bookId="]').filter(function () {
                         var m = $(this).attr('href').match(/bookId=(\d+)/);
                         return m && m[1] === String(bookId);
                     }).closest('.book-card');
@@ -140,6 +140,22 @@ $(document).ready(function () {
                 }
                 sessionStorage.removeItem('pendingStockUpdates');
             }
+                // 应用封面更新
+                var pendingCovers = sessionStorage.getItem('pendingCoverUpdates');
+                if (pendingCovers) {
+                    var coverUpdates = JSON.parse(pendingCovers);
+                    for (var bookId in coverUpdates) {
+                        var newCover = coverUpdates[bookId];
+                        var $card = $('#bookResultArea').find('a[href*="bookId="]').filter(function() {
+                            var m = $(this).attr('href').match(/bookId=(\d+)/);
+                            return m && m[1] === String(bookId);
+                        }).closest('.book-card');
+                        if ($card.length) {
+                            $card.find('.book-cover').attr('src', newCover + '?t=' + Date.now());
+                        }
+                    }
+                    sessionStorage.removeItem('pendingCoverUpdates');
+                }
             highlightCurrentNav('showBooks');
             if (typeof loadBookCategories === 'function') {
                 loadBookCategories();
@@ -181,6 +197,41 @@ $(document).ready(function () {
                 }
             });
         }
+    });
+
+    // "修改封面"文件选择（全局委托）
+    $(document).on('change', '#coverFileInput', function() {
+        var file = this.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert('文件大小不能超过5MB'); return; }
+
+        var $status = $('#coverUploadStatus').show().text('上传中...').css('color', '#ffc107');
+        var formData = new FormData();
+        formData.append('coverFile', file);
+        formData.append('bookId', $('#bid').val());
+
+        $.ajax({
+            url: '/uploadBookCover',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(r) {
+                if (r.success) {
+                    $('#bookCoverImg').attr('src', r.coverPath + '?t=' + Date.now());
+                    $status.text('封面更新成功').css('color', '#28a745');
+                    // 缓存封面更新，返回列表时自动刷新
+                    var pendingCovers = JSON.parse(sessionStorage.getItem('pendingCoverUpdates') || '{}');
+                    pendingCovers[$('#bid').val()] = r.coverPath;
+                    sessionStorage.setItem('pendingCoverUpdates', JSON.stringify(pendingCovers));
+                } else {
+                    $status.text('上传失败：' + r.message).css('color', '#dc3545');
+                }
+            },
+            error: function() {
+                $status.text('上传失败，请重试').css('color', '#dc3545');
+            }
+        });
     });
 
     // ========== 查询书籍页表单事件委托（支持"返回"后二次查询） ==========

@@ -165,11 +165,6 @@ public class AdminServicreImpl implements IAdminService {
             // 更新图书封面路径
             Book book = bookMapper.selectByPrimaryKey(bookId);
             if (book != null) {
-                // 如果原来有封面，删除旧文件
-                if (book.getCoverImage() != null) {
-                    FileUploadUtil.deleteFile(book.getCoverImage(), uploadBaseDir);
-                }
-
                 // 更新数据库
                 book.setCoverImage(relativePath);
                 bookMapper.updateByPrimaryKeySelective(book);
