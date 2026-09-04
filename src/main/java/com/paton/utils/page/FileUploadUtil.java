@@ -48,8 +48,8 @@ public class FileUploadUtil {
         Path filePath = dirPath.resolve(fileName);
         file.transferTo(filePath.toFile());
 
-        // 返回相对路径（用于数据库存储）
-        return subDir + "/" + dateDir + "/" + fileName;
+        // 返回相对路径（用于数据库存储），以 / 开头确保浏览器正确解析
+        return "/" + subDir + "/" + dateDir + "/" + fileName;
     }
 
     /**
