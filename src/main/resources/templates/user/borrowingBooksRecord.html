@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>借书记录</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <script src="/scripts/user/borrowingBooksRecord.js"></script>
+    <style>
+        .page-title {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #999;
+            padding-bottom: 10px;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .records-table th, .records-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .records-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .records-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .records-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        .pagination .page-info {
+            color: #666;
+            font-size: 14px;
+        }
+        .pagination a {
+            padding: 8px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .pagination a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<main class="main-content">
+    <h2 class="page-title">借书记录</h2>
+
+    <div th:if="${page != null and page.list != null and !page.list.empty}">
+        <table class="records-table">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>书籍ID</th>
+                <th>书名</th>
+                <th>借书日期</th>
+                <th>还书日期</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="borrowingBooks, stat : ${page.getList()}">
+                <td th:text="${stat.index + 1}"></td>
+                <td th:text="${borrowingBooks.getBook().getBookId()}"></td>
+                <td th:text="${borrowingBooks.getBook().getBookName()}"></td>
+                <td th:text="${borrowingBooks.getDateOfBorrowing()}"></td>
+                <td th:text="${borrowingBooks.getDateOfReturn() != null and !borrowingBooks.getDateOfReturn().isEmpty() ? borrowingBooks.getDateOfReturn() : '未归还'}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${page.pageCount > 1}">
+            <a id="prePage" th:href="@{/userBorrowingBooksPage(pageNum=${page.getPageNum()-1})}">上一页</a>
+            <span class="page-info">
+                <label id="lab1" th:text="${page.getPageNum()}">1</label> / <label id="lab2" th:text="${page.getPageCount()}">1</label>
+            </span>
+            <a id="nextPage" th:href="@{/userBorrowingBooksPage(pageNum=${page.getPageNum()+1})}">下一页</a>
+        </div>
+    </div>
+
+    <div th:if="${page == null or page.list == null or page.list.empty}" class="empty-message">
+        <p>📚 暂无借书记录</p>
+        <p><a href="/findBookPage" style="color: #4CAF50; text-decoration: underline;">去借阅更多好书</a></p>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>图书详情</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        .book-detail-container {
+            margin: 0 auto;
+            max-width: 800px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .book-header {
+            display: flex;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .book-cover {
+            width: 200px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .book-basic-info {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .book-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .book-meta {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .book-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-unavailable {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .book-content {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .book-introduction {
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        .book-description {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        .btn-edit {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #0069d9;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children open" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1" style="display:block">
+                    <li><a href="/addBookPage">录入新书</a></li>
+                    <li><a href="/addCategoryPage?pageNum=1">新建类别</a></li>
+                    <li><a href="/showBooksPage">查询书籍</a></li>
+                    <li><a href="/bookStatisticsPage">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2">
+                    <li><a href="/showUsersPage?pageNum=1">查询用户</a></li>
+                    <li><a href="/addUserPage">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3">
+                    <li><a href="/allBorrowingBooksRecordPage?pageNum=1">所有记录</a></li>
+                    <li><a href="/adminUserFavoritesPage">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4">
+                    <li><a href="/operationLogPage">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminIndex">返回首页</a>
+            <a href="/adminLogOut">退出</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="book-detail-container">
+        <div class="book-header">
+            <div>
+                <img th:src="${book.getCoverImageUrl()}" alt="图书封面" class="book-cover">
+            </div>
+
+            <div class="book-basic-info">
+                <h1 class="book-title" th:text="${book.getBookName()}"></h1>
+
+                <div class="book-meta">
+                    <strong>作者：</strong><span th:text="${book.getBookAuthor()}"></span>
+                </div>
+
+                <div class="book-meta">
+                    <strong>出版社：</strong><span th:text="${book.getBookPublish()}"></span>
+                </div>
+
+                <div class="book-meta">
+                    <strong>价格：</strong><span th:text="'¥' + ${book.getBookPrice()}"></span>
+                </div>
+
+                <div class="book-meta">
+                    <strong>图书ID：</strong><span th:text="${book.getBookId()}"></span>
+                </div>
+
+                <div class="book-meta">
+                    <strong>库存：</strong>
+                    <span id="stockDisplay" th:text="${book.getAvailableCount()}"></span> 本
+                    <input type="hidden" id="bid" th:value="${book.getBookId()}" />
+                    <button class="btn btn-edit"
+                            style="padding:2px 8px;font-size:12px;margin-left:8px;"
+                            onclick="(function(){var s=prompt('请输入新的库存数量：',$('#stockDisplay').text());if(s===null)return;var n=parseInt(s);if(isNaN(n)||n<0){alert('请输入有效数字');return;}$.ajax({url:'/updateBookStock',type:'POST',data:{bookId:$('#bid').val(),stock:n},success:function(r){if(r.success){$('#stockDisplay').text(r.availableCount);var $s=$('.book-status');if(r.availableCount>0){$s.text('可借').removeClass('status-unavailable').addClass('status-available')}else{$s.text('不可借').removeClass('status-available').addClass('status-unavailable')}alert('更新成功！');var p=JSON.parse(sessionStorage.getItem('pendingStockUpdates')||'{}');p[$('#bid').val()]=r.availableCount;sessionStorage.setItem('pendingStockUpdates',JSON.stringify(p))}else{alert('失败：'+r.message)}},error:function(){alert('请求失败')}})})()">修改库存</button>
+                </div>
+
+                <div th:class="${book.getIsExist() == '可借'} ? 'book-status status-available' : 'book-status status-unavailable'"
+                     th:text="${book.getIsExist()}">
+                </div>
+            </div>
+        </div>
+
+        <div class="book-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">图书编号</div>
+                    <div class="info-value" th:text="${book.getBookId()}"></div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">作者</div>
+                    <div class="info-value" th:text="${book.getBookAuthor()}"></div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">出版社</div>
+                    <div class="info-value" th:text="${book.getBookPublish()}"></div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">价格</div>
+                    <div class="info-value" th:text="'¥' + ${book.getBookPrice()}"></div>
+                </div>
+            </div>
+
+            <div th:if="${book.getBookIntroduction()}">
+                <h3 class="section-title">图书简介</h3>
+                <div class="book-introduction" th:text="${book.getBookIntroduction()}"></div>
+            </div>
+
+            <div th:if="${book.getDescription()}">
+                <h3 class="section-title">内容简介</h3>
+                <div class="book-description" th:text="${book.getDescription()}"></div>
+            </div>
+
+            <div th:if="${book.getBookIntroduction() == null and book.getDescription() == null}">
+                <h3 class="section-title">图书信息</h3>
+                <p style="color: #999; text-align: center;">暂无详细描述信息</p>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="javascript:void(0)" class="btn btn-back" id="btnGoBack"
+               th:attr="data-book-id=${book.getBookId()},data-book-name=${book.getBookName()}">返回</a>
+            <a href="javascript:void(0)" class="btn btn-back" id="btnGoBackToList"
+               th:attr="data-book-id=${book.getBookId()},data-book-name=${book.getBookName()}">返回列表</a>
+            <button class="btn btn-delete" id="btnDeleteBook"
+                    th:attr="data-book-id=${book.getBookId()},data-book-name=${book.getBookName()}">删除图书</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    window._bookId = '[[${book.getBookId()}]]';
+    window._bookName = '[[${book.getBookName()}]]';
+
+    function checkBookStatus() {
+        $.ajax({
+            url: '/checkBookAvailability',
+            type: 'GET',
+            data: { bookId: window._bookId },
+            success: function(response) {
+                if (response.success) {
+                    console.log('图书状态：', response.message);
+                }
+            }
+        });
+    }
+
+    $(function() {
+        checkBookStatus();
+
+        $('#btnGoBack').click(function() {
+            history.back();
+        });
+
+        $('#btnGoBackToList').click(function() {
+            window.location.href = '/showBooksPage?t=' + Date.now();
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户收藏管理</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <script src="/scripts/base/admin_base.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        .header__nav li ul li a.nav-active {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-left: 3px solid #4CAF50 !important;
+            padding-left: 0.9rem !important;
+        }
+        .content-container {
+            margin-left: 18%;
+            padding: 20px 16px;
+        }
+        .page-title {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #999;
+            padding-bottom: 10px;
+        }
+        .search-form {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .search-item {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .search-item label {
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .search-item input, .search-item select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .favorites-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .favorites-table th, .favorites-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .favorites-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .favorites-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .favorites-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .view-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+        }
+        .pagination a.active {
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1">
+                    <li><a href="/addBookPage">录入新书</a></li>
+                    <li><a href="/addCategoryPage?pageNum=1">新建类别</a></li>
+                    <li><a href="/showBooksPage">查询书籍</a></li>
+                    <li><a href="/bookStatisticsPage">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2">
+                    <li><a href="/showUsersPage?pageNum=1">查询用户</a></li>
+                    <li><a href="/addUserPage">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children open" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3" style="display:block">
+                    <li><a href="/allBorrowingBooksRecordPage?pageNum=1">所有记录</a></li>
+                    <li><a href="/adminUserFavoritesPage" class="nav-active">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4">
+                    <li><a href="/operationLogPage">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminLogOut">退出登录</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <h2 class="page-title">用户收藏管理</h2>
+
+    <form id="favoritesSearchForm" class="search-form" th:action="@{/adminUserFavoritesPage}" method="get">
+        <div class="search-item">
+            <label for="userName">用户名：</label>
+            <input type="text" id="userName" name="userName" th:value="${userName}" placeholder="输入用户名">
+        </div>
+        <div class="search-item">
+            <label for="bookName">图书名：</label>
+            <input type="text" id="bookName" name="bookName" th:value="${bookName}" placeholder="输入图书名">
+        </div>
+        <div class="search-item">
+            <button type="submit" class="action-btn view-btn">查询</button>
+            <button type="button" class="action-btn" onclick="resetSearch()" style="background-color: #666; color: white;">重置</button>
+        </div>
+    </form>
+
+    <div th:if="${page != null and page.list != null and !page.list.empty}">
+        <table class="favorites-table">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>用户名</th>
+                <th>图书名称</th>
+                <th>作者</th>
+                <th>出版社</th>
+                <th>收藏时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="favorite, stat : ${page.list}">
+                <td th:text="${stat.index + 1 + (page.pageNum - 1) * page.pageSize}"></td>
+                <td th:text="${favorite.user?.userName}">用户名</td>
+                <td th:text="${favorite.book?.bookName}">图书名称</td>
+                <td th:text="${favorite.book?.bookAuthor}">作者</td>
+                <td th:text="${favorite.book?.bookPublish}">出版社</td>
+                <td th:text="${#dates.format(favorite.createTime, 'yyyy-MM-dd HH:mm')}">收藏时间</td>
+                <td>
+                    <button class="action-btn delete-btn"
+                            th:onclick="'adminRemoveFavorite(' + ${favorite.favoriteId} + ')'">删除记录</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div id="favoritesPagination" class="pagination" th:if="${page.totalCount > 0}">
+            <a th:if="${page.pageNum > 1}"
+               th:href="@{/adminUserFavoritesPage(pageNum=${page.pageNum - 1}, userName=${userName}, bookName=${bookName})}">上一页</a>
+
+            <a th:each="i : ${#numbers.sequence(1, page.pageCount)}"
+               th:href="@{/adminUserFavoritesPage(pageNum=${i}, userName=${userName}, bookName=${bookName})}"
+               th:classappend="${i == page.pageNum} ? 'active' : ''"
+               th:text="${i}"></a>
+
+            <a th:if="${page.pageNum < page.pageCount}"
+               th:href="@{/adminUserFavoritesPage(pageNum=${page.pageNum + 1}, userName=${userName}, bookName=${bookName})}">下一页</a>
+
+            <span style="margin-left: 15px; color: #6c757d;">
+                共 <span th:text="${page.totalCount}"></span> 条记录
+            </span>
+        </div>
+    </div>
+
+    <div th:if="${page == null or page.list == null or page.list.empty}" class="empty-message">
+        <p>暂无用户收藏记录</p>
+    </div>
+
+    <script>
+        function resetSearch() {
+            document.getElementById('userName').value = '';
+            document.getElementById('bookName').value = '';
+            if (typeof loadFavoritesPage === 'function') {
+                loadFavoritesPage('/adminUserFavoritesPage?pageNum=1');
+            } else {
+                window.location.href = '/adminUserFavoritesPage';
+            }
+        }
+
+        function adminRemoveFavorite(favoriteId) {
+            if (confirm('确定要删除这条收藏记录吗？此操作不可恢复。')) {
+                $.ajax({
+                    url: '/admin/removeFavorite',
+                    type: 'POST',
+                    dataType: 'text',
+                    data: { favoriteId: favoriteId },
+                    success: function(response) {
+                        if (response.toString() == 'true') {
+                            alert('删除成功！');
+                            if (typeof loadFavoritesPage === 'function') {
+                                var pageNum = $('#favoritesPagination .active').text().trim() || '1';
+                                loadFavoritesPage('/adminUserFavoritesPage?pageNum=' + pageNum);
+                            } else {
+                                location.reload();
+                            }
+                        } else {
+                            alert('删除失败！请稍后重试。');
+                        }
+                    },
+                    error: function() {
+                        alert('删除失败！服务器异常，请稍后重试。');
+                    }
+                });
+            }
+        }
+    </script>
+</main>
+</body>
+</html>

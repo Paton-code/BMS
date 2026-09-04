@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加书籍</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <script src="/scripts/base/admin_base.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        /* 表单样式 */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        .required {
+            color: #ff4757;
+        }
+
+        /* 封面上传样式 */
+        .cover-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .cover-preview {
+            max-width: 150px;
+            max-height: 200px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .cover-upload-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .cover-upload-btn:hover {
+            background: #45a049;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* 按钮样式 */
+        .submit-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+        }
+
+        .submit-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background: #d32f2f;
+        }
+
+        /* 错误提示 */
+        .error {
+            border-color: #ff4757 !important;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 侧边导航栏 -->
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children open" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1" style="display:block">
+                    <li><a href="/addBookPage" style="color:#ffffff">录入新书</a></li>
+                    <li><a href="/addCategoryPage?pageNum=1">新建类别</a></li>
+                    <li><a href="/showBooksPage">查询书籍</a></li>
+                    <li><a href="/bookStatisticsPage">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2">
+                    <li><a href="/showUsersPage?pageNum=1">查询用户</a></li>
+                    <li><a href="/addUserPage">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3">
+                    <li><a href="/allBorrowingBooksRecordPage?pageNum=1">所有记录</a></li>
+                    <li><a href="/adminUserFavoritesPage">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4">
+                    <li><a href="/operationLogPage">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminIndex">返回首页</a>
+            <a href="/adminLogOut">退出登录</a>
+        </div>
+    </div>
+</header>
+
+<!-- 主要内容区域 -->
+<main class="main-content">
+    <h3 style="text-align: center">添加书籍</h3>
+
+    <div class="form-container">
+        <form id="addBookForm" method="post" enctype="multipart/form-data">
+            <!-- 图书基本信息 -->
+            <div class="form-group">
+                <label>书 名 <span class="required">*</span></label>
+                <input id="bookName" type="text" name="bookName" required>
+                <div class="error-message" id="nameError">请输入书名</div>
+            </div>
+
+            <div class="form-group">
+                <label>作 者 <span class="required">*</span></label>
+                <input id="bookAuthor" type="text" name="bookAuthor" required>
+                <div class="error-message" id="authorError">请输入作者</div>
+            </div>
+
+            <div class="form-group">
+                <label>出版社 <span class="required">*</span></label>
+                <input id="bookPublish" type="text" name="bookPublish" required>
+                <div class="error-message" id="publishError">请输入出版社</div>
+            </div>
+
+            <div class="form-group">
+                <label>类 别 <span class="required">*</span></label>
+                <select id="bookCategory" name="bookCategory" required>
+                    <option value="">请选择分类</option>
+                    <!-- 分类将通过JS动态加载 -->
+                </select>
+                <div class="error-message" id="categoryError">请选择分类</div>
+            </div>
+
+            <div class="form-group">
+                <label>价 格 <span class="required">*</span></label>
+                <input id="bookPrice" type="number" name="bookPrice" step="0.01" min="0" required>
+                <div class="error-message" id="priceError">请输入正确的价格</div>
+            </div>
+
+            <div class="form-group">
+                <label>简 介</label>
+                <textarea id="bookIntroduction" name="bookIntroduction" rows="3"></textarea>
+            </div>
+
+            <!-- 图书封面 -->
+            <div class="cover-section">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">图书封面（可选）</label>
+
+                <div style="text-align: center;">
+                    <img id="coverPreview" class="cover-preview" alt="封面预览">
+
+                    <input type="file" id="coverFile" name="coverFile" accept="image/*" style="display: none;">
+                    <button type="button" class="cover-upload-btn" onclick="document.getElementById('coverFile').click()">
+                        选择封面图片
+                    </button>
+                    <div class="upload-hint">
+                        支持 JPG、PNG 格式，大小不超过 5MB
+                    </div>
+                </div>
+            </div>
+
+            <!-- 详细描述 -->
+            <div class="form-group">
+                <label>详细描述</label>
+                <textarea id="description" name="description" rows="4"
+                          placeholder="请输入图书的详细描述..."></textarea>
+            </div>
+
+            <!-- 库存数量 -->
+            <div class="form-group">
+                <label>库存数量</label>
+                <input id="stock" type="number" name="stock" min="1" value="1">
+            </div>
+
+            <!-- 提交按钮 -->
+            <div>
+                <button id="submitBtn" type="submit" class="submit-btn">添加书籍</button>
+                <button type="button" class="reset-btn" onclick="resetForm()">重置</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // 加载图书分类
+            loadBookCategories();
+
+            // 初始化封面预览
+            initCoverPreview();
+
+            // 表单提交
+            $('#addBookForm').submit(function(e) {
+                e.preventDefault();
+                addBook();
+            });
+
+            // 输入框验证
+            $('#bookName, #bookAuthor, #bookPublish, #bookPrice').on('blur', function() {
+                validateField($(this));
+            });
+        });
+
+        // 加载图书分类
+        function loadBookCategories() {
+            $.ajax({
+                url: '/findAllBookCategory',
+                type: 'GET',
+                success: function(categories) {
+                    var select = $('#bookCategory');
+                    select.empty();
+                    select.append('<option value="">请选择分类</option>');
+
+                    if (categories && categories.length > 0) {
+                        categories.forEach(function(category) {
+                            select.append('<option value="' + category.categoryId + '">' +
+                                category.categoryName + '</option>');
+                        });
+                    }
+                },
+                error: function() {
+                    alert('加载分类失败，请刷新页面重试');
+                }
+            });
+        }
+
+        // 初始化封面预览
+        function initCoverPreview() {
+            $('#coverFile').change(function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    // 检查文件大小（5MB限制）
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('文件大小不能超过5MB');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // 检查文件类型
+                    var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (validTypes.indexOf(file.type) === -1) {
+                        alert('只支持JPG、PNG、GIF格式的图片');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // 预览图片
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#coverPreview').attr('src', e.target.result);
+                        $('#coverPreview').show();
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // 验证单个字段
+        function validateField($field) {
+            var value = $field.val();
+            var $error = $field.next('.error-message');
+
+            if ($field.attr('id') === 'bookPrice') {
+                // 价格验证
+                if (!value || parseFloat(value) <= 0) {
+                    $field.addClass('error');
+                    $error.text('价格必须大于0').show();
+                    return false;
+                }
+            } else if ($field.prop('required') && !value) {
+                // 必填字段验证
+                $field.addClass('error');
+                $error.show();
+                return false;
+            }
+
+            $field.removeClass('error');
+            $error.hide();
+            return true;
+        }
+
+        // 添加图书
+        function addBook() {
+            // 验证所有字段
+            var isValid = true;
+
+            // 验证必填字段
+            $('#addBookForm [required]').each(function() {
+                if (!validateField($(this))) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                alert('请填写所有必填字段');
+                return;
+            }
+
+            // 禁用提交按钮
+            $('#submitBtn').prop('disabled', true).text('添加中...');
+
+            // 创建FormData对象
+            var formData = new FormData($('#addBookForm')[0]);
+
+            // 发送请求
+            $.ajax({
+                url: '/addBookWithCover',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.success) {
+                        alert('添加成功！');
+                        resetForm();
+                    } else {
+                        alert('添加失败：' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    var errorMsg = '添加失败，请稍后重试';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    alert(errorMsg);
+                },
+                complete: function() {
+                    // 恢复按钮状态
+                    $('#submitBtn').prop('disabled', false).text('添加书籍');
+                }
+            });
+        }
+
+        // 重置表单
+        function resetForm() {
+            $('#addBookForm')[0].reset();
+            $('#coverPreview').hide().attr('src', '');
+            $('input, select').removeClass('error');
+            $('.error-message').hide();
+
+            // 重新加载分类
+            loadBookCategories();
+        }
+    </script>
+</main>
+
+</body>
+</html>

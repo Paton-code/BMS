@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作日志查询 - 图书管理系统</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <script src="/scripts/base/admin_base.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        .header__nav li ul li a.nav-active {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-left: 3px solid #4CAF50 !important;
+            padding-left: 0.9rem !important;
+        }
+        .log-container {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px;
+        }
+
+        .search-form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .search-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-item label {
+            min-width: 80px;
+            font-weight: bold;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .log-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .log-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .operation-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .type-new { background: #d4edda; color: #155724; }
+        .type-edit { background: #fff3cd; color: #856404; }
+        .type-delete { background: #f8d7da; color: #721c24; }
+        .type-query { background: #d1ecf1; color: #0c5460; }
+        .type-login { background: #e2e3e5; color: #383d41; }
+
+        .operation-result {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .result-success { background: #d4edda; color: #155724; }
+        .result-failure { background: #f8d7da; color: #721c24; }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 2px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .pagination a.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination a:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .details-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .details-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1">
+                    <li><a href="#" data-page="addBook">录入新书</a></li>
+                    <li><a href="#" data-page="addCategory">新建类别</a></li>
+                    <li><a href="#" data-page="showBooks">查询书籍</a></li>
+                    <li><a href="#" data-page="bookStatistics">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2">
+                    <li><a href="#" data-page="showUsers">查询用户</a></li>
+                    <li><a href="#" data-page="addUser">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3">
+                    <li><a href="#" data-page="allBorrowRecords">所有记录</a></li>
+                    <li><a href="#" data-page="adminUserFavorites">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children open" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4" style="display:block">
+                    <li><a href="#" data-page="operationLog" class="nav-active">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminLogOut">退出登录</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="log-container">
+        <h2>操作日志查询</h2>
+
+        <!-- 搜索表单 -->
+        <div class="search-form">
+            <form id="operationLogSearchForm" th:action="@{/operationLogByType}" method="get">
+                <div class="search-row">
+                    <div class="search-item">
+                        <label>操作类型：</label>
+                        <select name="operationType" id="operationType">
+                            <option value="">全部类型</option>
+                            <option value="新增">新增</option>
+                            <option value="修改">修改</option>
+                            <option value="删除">删除</option>
+                            <option value="查询">查询</option>
+                            <option value="登录">登录</option>
+                            <option value="退出">退出</option>
+                        </select>
+                    </div>
+                    <div class="search-item">
+                        <label>操作模块：</label>
+                        <select name="operationModule" id="operationModule">
+                            <option value="">全部模块</option>
+                            <option value="用户管理">用户管理</option>
+                            <option value="图书管理">图书管理</option>
+                            <option value="分类管理">分类管理</option>
+                            <option value="借阅管理">借阅管理</option>
+                            <option value="系统管理">系统管理</option>
+                        </select>
+                    </div>
+                    <div class="search-item">
+                        <button type="submit" class="btn btn-primary">查询</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetOperationLogSearch()">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 日志表格 -->
+        <div class="table-responsive">
+            <table class="log-table">
+                <thead>
+                <tr>
+                    <th>操作时间</th>
+                    <th>管理员</th>
+                    <th>操作类型</th>
+                    <th>操作模块</th>
+                    <th>操作描述</th>
+                    <th>操作目标</th>
+                    <th>操作IP</th>
+                    <th>操作结果</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(page.list)}">
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-info-circle"></i> 暂无操作日志记录
+                    </td>
+                </tr>
+                <tr th:each="log : ${page.list}">
+                    <td th:text="${#dates.format(log.operationTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${log.adminName}"></td>
+                    <td>
+                                <span th:classappend="'operation-type type-' + ${#strings.toLowerCase(log.operationType)}"
+                                      th:text="${log.operationType}"></span>
+                    </td>
+                    <td th:text="${log.operationModule}"></td>
+                    <td th:text="${log.operationDescription}"></td>
+                    <td th:text="${log.operationTarget} ?: '-'"></td>
+                    <td th:text="${log.operationIp} ?: '-'"></td>
+                    <td>
+                                <span th:classappend="'operation-result result-' + ${#strings.toLowerCase(log.operationResult)}"
+                                      th:text="${log.operationResult}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div id="operationLogPagination" class="pagination" th:if="${page.totalCount > 0}">
+            <a th:if="${page.pageNum > 1}"
+               th:href="@{/operationLogByType(pageNum=${page.pageNum - 1}, operationType=${operationType}, operationModule=${operationModule})}">上一页</a>
+
+            <a th:each="i : ${#numbers.sequence(1, page.pageCount)}"
+               th:href="@{/operationLogByType(pageNum=${i}, operationType=${operationType}, operationModule=${operationModule})}"
+               th:classappend="${i == page.pageNum} ? 'active' : ''"
+               th:text="${i}"></a>
+
+            <a th:if="${page.pageNum < page.pageCount}"
+               th:href="@{/operationLogByType(pageNum=${page.pageNum + 1}, operationType=${operationType}, operationModule=${operationModule})}">下一页</a>
+
+            <span style="margin-left: 15px; color: #6c757d;">
+                    共 <span th:text="${page.totalCount}"></span> 条记录
+                </span>
+        </div>
+    </div>
+
+    <script>
+        // 回填搜索表单的选中值
+        (function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var operationType = urlParams.get('operationType');
+            var operationModule = urlParams.get('operationModule');
+            if (operationType) {
+                var typeEl = document.getElementById('operationType');
+                if (typeEl) typeEl.value = operationType;
+            }
+            if (operationModule) {
+                var moduleEl = document.getElementById('operationModule');
+                if (moduleEl) moduleEl.value = operationModule;
+            }
+        })();
+
+        function resetOperationLogSearch() {
+            if (typeof loadOperationLogPage === 'function') {
+                loadOperationLogPage('/operationLogByType?pageNum=1');
+            } else {
+                window.location.href = '/operationLogPage';
+            }
+        }
+
+        function refreshLogs() {
+            fetch('/getLatestOperationLogs?limit=5')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        console.log('最新日志:', data.data);
+                    }
+                })
+                .catch(function(error) { console.error('获取日志失败:', error); });
+        }
+    </script>
+</main>
+</body>
+</html>

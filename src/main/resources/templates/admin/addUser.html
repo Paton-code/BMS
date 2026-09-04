@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>新增用户</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <script src="/scripts/jquery.validate.min.js"></script>
+    <script src="/scripts/messages_zh.min.js"></script>
+    <script src="/scripts/base/admin_base.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <script src="/scripts/admin/addUser.js"></script>
+    <style>
+        :root {
+            --input-focus: #2d8cf0;
+            --font-color: #323232;
+            --font-color-sub: #666;
+            --bg-color: #fff;
+            --main-color: #323232;
+        }
+
+        .add-user-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            padding: 40px 20px;
+        }
+
+        .add-user-card {
+            width: 340px;
+            padding: 30px 25px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            box-shadow: 4px 4px var(--main-color);
+        }
+
+        .add-user-card .card-title {
+            margin: 10px 0 25px 0;
+            font-size: 25px;
+            font-weight: 900;
+            text-align: center;
+            color: var(--main-color);
+        }
+
+        .add-user-card .card-icon {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .add-user-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .add-user-form .form-input {
+            width: 250px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px var(--main-color);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--font-color);
+            padding: 5px 10px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .add-user-form .form-input::placeholder {
+            color: var(--font-color-sub);
+            opacity: 0.8;
+        }
+
+        .add-user-form .form-input:focus {
+            border: 2px solid var(--input-focus);
+        }
+
+        .add-user-form .form-btn {
+            margin: 10px 0 10px 0;
+            width: 120px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px var(--main-color);
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--font-color);
+            cursor: pointer;
+        }
+
+        .add-user-form .form-btn:active {
+            box-shadow: 0px 0px var(--main-color);
+            transform: translate(3px, 3px);
+        }
+
+        .add-user-card .hint-text {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1">
+                    <li><a href="/addBookPage">录入新书</a></li>
+                    <li><a href="/addCategoryPage?pageNum=1">新建类别</a></li>
+                    <li><a href="/showBooksPage">查询书籍</a></li>
+                    <li><a href="/bookStatisticsPage">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children open" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2" style="display:block">
+                    <li><a href="/showUsersPage?pageNum=1">查询用户</a></li>
+                    <li><a href="/addUserPage" style="color:#ffffff">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3">
+                    <li><a href="/allBorrowingBooksRecordPage?pageNum=1">所有记录</a></li>
+                    <li><a href="/adminUserFavoritesPage">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4">
+                    <li><a href="/operationLogPage">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminLogOut">退出登录</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="add-user-wrapper">
+        <div class="add-user-card">
+            <div class="card-icon">👤</div>
+            <div class="card-title">新增用户</div>
+
+            <form id="addUserForm" class="add-user-form" action="#">
+                <input class="form-input" type="text" id="userName" name="userName" placeholder="用户名" required>
+                <input class="form-input" type="password" id="password" name="userPwd" placeholder="密码" required>
+                <input class="form-input" type="email" id="userEmail" name="userEmail" placeholder="邮箱" required>
+                <input id="btn_addUser" class="form-btn" type="submit" value="添加">
+            </form>
+
+            <p class="hint-text">填写信息后点击按钮即可新增用户</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

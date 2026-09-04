@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的收藏</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        .content-container {
+            margin-left: 18%;
+            padding: 20px 16px;
+        }
+        .page-title {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #999;
+            padding-bottom: 10px;
+        }
+        .favorites-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .favorites-table th, .favorites-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .favorites-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .favorites-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .favorites-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .view-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<main class="main-content">
+    <h2 class="page-title">我的收藏</h2>
+
+    <div th:if="${favorites != null and !favorites.empty}">
+        <table class="favorites-table">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>图书名称</th>
+                <th>作者</th>
+                <th>出版社</th>
+                <th>收藏时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="favorite, stat : ${favorites}">
+                <td th:text="${stat.index + 1}"></td>
+                <td th:text="${favorite.book?.bookName}">图书名称</td>
+                <td th:text="${favorite.book?.bookAuthor}">作者</td>
+                <td th:text="${favorite.book?.bookPublish}">出版社</td>
+                <td th:text="${#dates.format(favorite.createTime, 'yyyy-MM-dd HH:mm')}">收藏时间</td>
+                <td>
+                    <button class="action-btn remove-btn"
+                            th:onclick="'removeFavorite(' + ${favorite.favoriteId} + ')'">取消收藏</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${favorites == null or favorites.empty}" class="empty-message">
+        <p>您还没有收藏任何图书</p>
+        <p><a href="/findBookPage" style="color: #4CAF50; text-decoration: underline;">去发现更多好书</a></p>
+    </div>
+
+    <script>
+    </script>
+</main>
+</body>
+</html>

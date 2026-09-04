@@ -1,0 +1,63 @@
+<main class="main-content">
+    <div class="upload-container">
+        <div class="upload-box">
+            <h2 class="upload-title">修改头像</h2>
+
+            <div class="avatar-preview-container">
+                <img id="avatarPreview" class="avatar-preview" alt="头像预览">
+            </div>
+
+            <form id="uploadAvatarForm">
+                <div class="upload-controls">
+                    <div class="file-input-container">
+                        <label for="avatarFile" class="file-input-label">
+                            <i class="fas fa-cloud-upload-alt"></i> 选择头像文件
+                        </label>
+                        <input type="file" id="avatarFile" name="avatarFile" class="file-input" accept="image/*">
+                        <div id="fileName" class="file-name"></div>
+                    </div>
+
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">0%</div>
+                    </div>
+
+                    <div class="upload-hint">
+                        支持 JPG、PNG、GIF 格式，建议尺寸 200x200 像素，大小不超过 5MB
+                    </div>
+                </div>
+
+                <div class="requirements">
+                    <h4>头像要求：</h4>
+                    <ul>
+                        <li>图片格式：JPG、PNG、GIF</li>
+                        <li>图片大小：不超过 5MB</li>
+                        <li>建议尺寸：200x200 像素</li>
+                        <li>建议内容：清晰的个人照片或头像</li>
+                        <li>避免使用：模糊、不清晰或包含不当内容的图片</li>
+                    </ul>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-upload" id="uploadBtn">上传头像</button>
+                    <button type="button" class="btn-cancel" onclick="resetForm()">重置</button>
+                    <button type="button" class="btn-back" onclick="window.location.href='/userMessagePage'">返回</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    // 显示选择的文件名
+    $('#avatarFile').change(function() {
+        var fileName = $(this).val().split('\\').pop();
+        $('#fileName').text('已选择：' + fileName);
+        $('#progressContainer').show();
+    });
+</script>
+
+</body>
+</html>

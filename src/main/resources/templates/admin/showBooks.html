@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>图书查询</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <style>
+        .book-list-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .book-card {
+            width: 220px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .book-cover {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+        .book-info { padding: 15px; }
+        .book-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .book-remain {
+            font-weight: normal;
+            font-size: 11px;
+            color: #999;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+        .book-author { color: #666; font-size: 14px; margin-bottom: 5px; }
+        .book-publisher { color: #888; font-size: 12px; margin-bottom: 8px; }
+        .book-price { color: #e74c3c; font-weight: bold; font-size: 16px; }
+        .book-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .status-available { background: #d4edda; color: #155724; }
+        .status-unavailable { background: #f8d7da; color: #721c24; }
+        .view-details-btn {
+            display: block;
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 0;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        .view-details-btn:hover { background: #2980b9; }
+        .search-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .search-title { color: #333; margin-bottom: 15px; }
+        .search-form { margin-bottom: 15px; }
+        .search-form select,
+        .search-form input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .search-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+        .search-btn:hover { background: #45a049; }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        .page-btn {
+            padding: 8px 16px;
+            background: #f1f2f6;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .page-btn:hover { background: #dfe4ea; }
+        .page-btn.disabled { background: #ddd; color: #999; cursor: not-allowed; }
+        .page-info { color: #666; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-icon { font-size: 48px; margin-bottom: 20px; }
+        .page-container { display: flex; gap: 30px; }
+        .left-panel { width: 300px; }
+        .right-panel { flex: 1; }
+    </style>
+</head>
+<body>
+
+<header class="s-header">
+    <div class="header__logo">
+        <img class="avatar-img" src="/images/default-avatar.png" alt="管理员头像">
+        <p class="username">admin</p>
+        <p class="user-role">管理员</p>
+    </div>
+    <div class="header__nav-wrap">
+        <ul class="header__nav">
+            <li class="has-children open" id="click_1">
+                <a href="#">书籍管理</a>
+                <ul id="sub_1" style="display:block">
+                    <li><a href="/addBookPage">录入新书</a></li>
+                    <li><a href="/addCategoryPage?pageNum=1">新建类别</a></li>
+                    <li><a href="/showBooksPage" style="color:#ffffff">查询书籍</a></li>
+                    <li><a href="/bookStatisticsPage">书籍统计</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_2">
+                <a href="#">用户管理</a>
+                <ul id="sub_2">
+                    <li><a href="/showUsersPage?pageNum=1">查询用户</a></li>
+                    <li><a href="/addUserPage">新增用户</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_3">
+                <a href="#">借阅信息</a>
+                <ul id="sub_3">
+                    <li><a href="/allBorrowingBooksRecordPage?pageNum=1">所有记录</a></li>
+                    <li><a href="/adminUserFavoritesPage">查看用户收藏</a></li>
+                </ul>
+            </li>
+            <li class="has-children" id="click_4">
+                <a href="#">帮助</a>
+                <ul id="sub_4">
+                    <li><a href="/operationLogPage">操作日志查询</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="header__bottom">
+            <a href="/adminIndex">返回首页</a>
+            <a href="/adminLogOut">退出登录</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <h3 style="text-align: center; margin-bottom: 20px;">查询书籍</h3>
+
+    <div class="page-container">
+        <div class="left-panel">
+            <div class="search-section">
+                <h3 class="search-title">按类别查找</h3>
+                <form id="bookCategoryForm" class="search-form">
+                    <select id="bookCategory" name="bookCategory" required>
+                        <option value="">选择分类</option>
+                    </select>
+                    <input type="hidden" name="pageNum" value="1">
+                    <button type="submit" class="search-btn">查找</button>
+                </form>
+            </div>
+
+            <div class="search-section" style="margin-top: 20px;">
+                <h3 class="search-title">按书名查找</h3>
+                <form id="findBookByNameForm" class="search-form">
+                    <input type="text" id="bookName" name="bookName" placeholder="输入书名">
+                    <button type="submit" class="search-btn">查找</button>
+                </form>
+            </div>
+
+            <div class="search-section" style="margin-top: 20px;">
+                <h3 class="search-title">查看所有书籍</h3>
+                <button type="button" id="showAllBooksBtn" class="search-btn">查看全部</button>
+            </div>
+        </div>
+
+        <div class="right-panel" id="bookResultArea">
+            <div th:if="${page != null and (page.list == null or page.list.size() == 0)}" class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h3>暂无图书数据</h3>
+                <p>请先录入图书或选择其他查询方式</p>
+            </div>
+
+            <div th:if="${bookList != null and bookList.size() == 0}" class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h3>暂无图书数据</h3>
+                <p>请先录入图书或选择其他查询方式</p>
+            </div>
+
+            <div class="book-list-container" th:if="${page != null and page.list != null and page.list.size() > 0}">
+                <div class="book-card" th:each="book:${page.getList()}">
+                    <img th:src="${book.getCoverImageUrl()}" alt="图书封面" class="book-cover">
+                    <div class="book-info">
+                        <div class="book-title">
+                            <span th:text="${book.getBookName()}"></span>
+                            <span class="book-remain" style="color:#999; font-size:11px;" th:text="'剩' + ${book.getAvailableCount()} + '本'">剩3本</span>
+                        </div>
+                        <div class="book-author" th:text="'作者：' + ${book.getBookAuthor()}"></div>
+                        <div class="book-publisher" th:text="'出版社：' + ${book.getBookPublish()}"></div>
+                        <div class="book-price" th:text="'¥' + ${book.getBookPrice()}"></div>
+                        <div th:class="${book.getIsExist() == '可借'} ? 'book-status status-available' : 'book-status status-unavailable'"
+                             th:text="${book.getIsExist()}"></div>
+                        <a th:href="@{/bookDetailPage(bookId=${book.getBookId()})}" class="view-details-btn">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-list-container" th:if="${bookList != null and bookList.size() > 0}">
+                <div class="book-card" th:each="book:${bookList}">
+                    <img th:src="${book.getCoverImageUrl()}" alt="图书封面" class="book-cover">
+                    <div class="book-info">
+                        <div class="book-title">
+                            <span th:text="${book.getBookName()}"></span>
+                            <span class="book-remain" style="color:#999; font-size:11px;" th:text="'剩' + ${book.getAvailableCount()} + '本'">剩3本</span>
+                        </div>
+                        <div class="book-author" th:text="'作者：' + ${book.getBookAuthor()}"></div>
+                        <div class="book-publisher" th:text="'出版社：' + ${book.getBookPublish()}"></div>
+                        <div class="book-price" th:text="'¥' + ${book.getBookPrice()}"></div>
+                        <div th:class="${book.getIsExist() == '可借'} ? 'book-status status-available' : 'book-status status-unavailable'"
+                             th:text="${book.getIsExist()}"></div>
+                        <a th:href="@{/bookDetailPage(bookId=${book.getBookId()})}" class="view-details-btn">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${page != null and page.pageCount > 1}" class="pagination">
+                <a th:href="@{/showBooksResultPageByCategoryId(pageNum=${page.pageNum - 1}, bookCategory=${bookCategory})}"
+                   th:class="${page.pageNum == 1} ? 'page-btn disabled' : 'page-btn'"
+                   th:if="${page.pageNum > 1}">上一页</a>
+                <span th:if="${page.pageNum == 1}" class="page-btn disabled">上一页</span>
+                <span class="page-info">
+                    第 <span th:text="${page.pageNum}"></span> 页 / 共 <span th:text="${page.pageCount}"></span> 页
+                </span>
+                <a th:href="@{/showBooksResultPageByCategoryId(pageNum=${page.pageNum + 1}, bookCategory=${bookCategory})}"
+                   th:class="${page.pageNum == page.pageCount} ? 'page-btn disabled' : 'page-btn'"
+                   th:if="${page.pageNum < page.pageCount}">下一页</a>
+                <span th:if="${page.pageNum == page.pageCount}" class="page-btn disabled">下一页</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            loadBookCategories();
+        });
+
+        function loadBookCategories() {
+            $.ajax({
+                url: '/findAllBookCategory',
+                type: 'GET',
+                success: function(categories) {
+                    var select = $('#bookCategory');
+                    select.empty();
+                    select.append('<option value="">选择分类</option>');
+                    if (categories && categories.length > 0) {
+                        categories.forEach(function(category) {
+                            select.append('<option value="' + category.categoryId + '">' +
+                                category.categoryName + '</option>');
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('加载分类失败');
+                }
+            });
+        }
+
+        function loadBookResult(url) {
+            sessionStorage.setItem('lastSearchUrl', url);
+            $('#bookResultArea').html('<div style="text-align:center;padding:40px;color:#999;">加载中...</div>');
+            $.ajax({
+                url: url,
+                type: 'GET',
+                cache: false,
+                dataType: 'html',
+                success: function(html) {
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    var mainEl = tempDiv.querySelector('main.main-content');
+                    var resultHtml = '';
+
+                    if (mainEl) {
+                        var rightPanel = mainEl.querySelector('.right-panel');
+                        if (rightPanel) {
+                            resultHtml = rightPanel.innerHTML;
+                        } else {
+                            resultHtml = mainEl.innerHTML;
+                        }
+                    } else {
+                        resultHtml = html;
+                    }
+
+                    if (!resultHtml || resultHtml.trim() === '') {
+                        resultHtml = '<div class="empty-state"><div class="empty-icon">📚</div><h3>暂无结果</h3></div>';
+                    }
+
+                    $('#bookResultArea').html(resultHtml);
+
+                    if (typeof highlightCurrentNav === 'function') {
+                        highlightCurrentNav('showBooks');
+                    }
+                },
+                error: function() {
+                    $('#bookResultArea').html(
+                        '<div class="empty-state"><div class="empty-icon">❌</div><h3>加载失败</h3></div>'
+                    );
+                }
+            });
+        }
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                var lastUrl = sessionStorage.getItem('lastSearchUrl');
+                if (lastUrl) {
+                    loadBookResult(lastUrl);
+                }
+            }
+        });
+    </script>
+</main>
+
+</body>
+</html>

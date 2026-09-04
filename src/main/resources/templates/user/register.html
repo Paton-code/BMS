@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <script th:src="@{/scripts/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/scripts/jquery.validate.min.js}"></script>
+    <script th:src="@{/scripts/messages_zh.min.js}"></script>
+    <script th:src="@{/scripts/base/user_base.js}"></script>
+    <script th:src="@{/scripts/user/register.js(v=20260831)}"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 视频背景样式 */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 视频背景遮罩，增强表单可读性 */
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .form {
+            --input-focus: #2d8cf0;
+            --font-color: #ffffff;
+            --font-color-sub: #e0e0e0;
+            --bg-color: rgba(255, 255, 255, 0.85);
+            --main-color: #ffffff;
+            padding: 30px;
+            background: rgba(211, 211, 211, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 16px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            min-width: 320px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            color: var(--font-color);
+            font-weight: 900;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .title span {
+            color: var(--font-color-sub);
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .input {
+            width: 260px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            font-size: 15px;
+            font-weight: 600;
+            color: #323232;
+            padding: 5px 10px;
+            outline: none;
+        }
+
+        .input::placeholder {
+            color: #888888;
+            opacity: 0.8;
+        }
+
+        .input:focus {
+            border: 2px solid var(--input-focus);
+        }
+
+        .button-confirm:active {
+            box-shadow: 0px 0px var(--main-color);
+            transform: translate(3px, 3px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .button {
+            width: 90px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            font-size: 15px;
+            font-weight: 600;
+            color: #323232;
+            cursor: pointer;
+        }
+
+        .button-primary {
+            background-color: #2d8cf0;
+            color: white;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--font-color-sub);
+            margin-top: 4px;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--main-color);
+            margin-bottom: 8px;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-upload {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid var(--main-color);
+            background: var(--bg-color);
+            cursor: pointer;
+            color: #323232;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--font-color);
+        }
+
+        .checkbox-group a {
+            color: #80ccff;
+            text-decoration: none;
+        }
+
+        .link-group {
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .link-group a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .link-group a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 视频背景 -->
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source th:src="@{/videos/background.mp4}" type="video/mp4">
+    </video>
+</div>
+
+<form id="registerForm" class="form" method="post">
+    <div class="title">用户注册<br><span>欢迎进入图书管理系统</span></div>
+
+    <div>
+        <input type="text" id="userName" name="userName" class="input" placeholder="用户名" required>
+        <div class="hint" id="usernameHint"></div>
+    </div>
+
+    <div>
+        <input type="password" id="userPwd" name="userPwd" class="input" placeholder="密码" required>
+        <div class="hint" id="passwordHint"></div>
+    </div>
+
+    <div>
+        <input type="password" id="confirmPwd" name="confirmPwd" class="input" placeholder="确认密码" required>
+        <div class="hint" id="confirmPwdHint"></div>
+    </div>
+
+    <div>
+        <input type="email" id="userEmail" name="userEmail" class="input" placeholder="邮箱" required>
+        <div class="hint" id="emailHint"></div>
+    </div>
+
+    <div>
+        <div class="avatar-upload">
+            <div class="avatar-preview" id="avatarPreview">
+                <img th:src="@{/images/default-avatar.png}" alt="默认头像" id="previewImage">
+            </div>
+            <input type="file" id="avatarFile" name="avatarFile" accept="image/*" style="display: none;">
+            <button type="button" class="btn-upload" onclick="document.getElementById('avatarFile').click()">选择头像</button>
+            <div class="hint">支持 JPG、PNG，不超过 5MB</div>
+        </div>
+    </div>
+
+    <div class="checkbox-group">
+        <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+        <label for="agreeTerms">我已阅读并同意<a href="#">《用户协议》</a></label>
+    </div>
+
+    <div class="button-group">
+        <button type="submit" class="button button-primary">注册</button>
+        <button type="reset" class="button">重置</button>
+        <button type="button" class="button" onclick="window.location.href='/'">返回</button>
+    </div>
+
+    <div class="link-group">
+        <a href="/">已有账号？立即登录</a>
+    </div>
+</form>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### Sensitive Config ###
+application.properties
+!application.properties.example
+
+### Logs & Temp ###
+*.log
+*.tmp
+*.swp
+*~
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Uploads ###
+/uploads/

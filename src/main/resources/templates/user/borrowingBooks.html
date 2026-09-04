@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>借阅书籍</title>
+    <script src="/scripts/jquery-3.3.1.min.js"></script>
+    <link href="/css/myUIstyle.css" rel="stylesheet" />
+    <script src="/scripts/jquery.validate.min.js"></script>
+    <script src="/scripts/messages_zh.min.js"></script>
+    <style>
+        .borrow-book-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+            padding: 40px 20px;
+        }
+
+        .borrow-book-card {
+            position: relative;
+            width: 320px;
+            padding: 40px 30px 50px;
+            background-color: #FFF;
+            border-radius: 8px;
+            color: #333;
+            box-shadow: 0px 0px 60px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .borrow-book-card:after {
+            position: absolute;
+            content: "";
+            right: -10px;
+            bottom: 18px;
+            width: 0;
+            height: 0;
+            border-left: 0px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #1a044e;
+        }
+
+        .borrow-book-card .card-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            line-height: 28px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .borrow-book-card .card-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .borrow-book-card .book-input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #d4d4d4;
+            padding: 12px 10px;
+            background: transparent;
+            transition: all .25s ease;
+            font-size: 15px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .borrow-book-card .book-input:focus {
+            outline: none;
+            border-bottom: 2px solid #0d095e;
+        }
+
+        .borrow-book-card .input-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .borrow-book-card .submit-btn {
+            position: absolute;
+            border-radius: 30px;
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
+            background-color: #0f0092;
+            color: #FFF;
+            padding: 14px 30px;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            right: -10px;
+            bottom: -20px;
+            cursor: pointer;
+            transition: all .25s ease;
+            box-shadow: -5px 6px 20px 0px rgba(26, 26, 26, 0.4);
+            border: none;
+        }
+
+        .borrow-book-card .submit-btn:hover {
+            background-color: #07013d;
+            box-shadow: -5px 6px 20px 0px rgba(88, 88, 88, 0.569);
+        }
+
+        .borrow-book-card .hint-text {
+            text-align: center;
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<main class="main-content">
+    <div class="borrow-book-wrapper">
+        <div class="borrow-book-card">
+            <div class="card-icon">📖</div>
+            <p class="card-title">借阅书籍</p>
+
+            <form id="borrowingBookForm" action="#" method="post">
+                <span class="input-label">请输入要借阅的书籍编号</span>
+                <input id="bookId" class="book-input" type="text" name="bookId" placeholder="书籍编号">
+                <button id="btn1" type="submit" class="submit-btn">确认借书</button>
+            </form>
+
+            <p class="hint-text">输入编号后点击按钮即可借阅</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

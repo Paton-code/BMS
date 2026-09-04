@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员登录</title>
+
+    <script th:src="@{/scripts/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/scripts/jquery.validate.min.js}"></script>
+    <script th:src="@{/scripts/messages_zh.min.js}"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 视频背景样式 */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 视频背景遮罩，增强表单可读性 */
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .form {
+            --input-focus: #2d8cf0;
+            --font-color: #ffffff;
+            --font-color-sub: #e0e0e0;
+            --bg-color: rgba(255, 255, 255, 0.85);
+            --main-color: #ffffff;
+            padding: 30px;
+            background: rgba(211, 211, 211, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 20px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            min-width: 320px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            color: var(--font-color);
+            font-weight: 900;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .title span {
+            color: var(--font-color-sub);
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .input {
+            width: 260px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            font-size: 15px;
+            font-weight: 600;
+            color: #323232;
+            padding: 5px 10px;
+            outline: none;
+        }
+
+        .input::placeholder {
+            color: var(--font-color-sub);
+            opacity: 0.8;
+        }
+
+        .input:focus {
+            border: 2px solid var(--input-focus);
+        }
+
+        .button-confirm:active {
+            box-shadow: 0px 0px var(--main-color);
+            transform: translate(3px, 3px);
+        }
+
+        .button-confirm {
+            margin: 10px auto 0 auto;
+            width: 120px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid var(--main-color);
+            background-color: var(--bg-color);
+            box-shadow: 4px 4px rgba(0, 0, 0, 0.3);
+            font-size: 17px;
+            font-weight: 600;
+            color: #323232;
+            cursor: pointer;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .back-link a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            display: none;
+            width: 260px;
+            padding: 10px 12px;
+            background: rgba(255, 80, 80, 0.15);
+            border: 1px solid rgba(255, 80, 80, 0.5);
+            border-radius: 5px;
+            color: #ff5252;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 视频背景 -->
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source th:src="@{/videos/background.mp4}" type="video/mp4">
+    </video>
+</div>
+
+<form id="adminLoginForm" class="form">
+    <div class="title">管理员登录<br><span>欢迎进入图书管理系统</span></div>
+    <div class="error-msg" id="loginError"></div>
+    <input type="text" id="adminName" name="adminName" class="input" placeholder="请输入管理员账号" required>
+    <input type="password" id="password" name="password" class="input" placeholder="请输入密码" required>
+    <button type="submit" class="button-confirm">登录 →</button>
+    <div class="back-link">
+        <a th:href="@{/}">返回用户登录</a>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('#adminLoginForm').validate({
+            rules: {
+                adminName: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 20
+                },
+                password: {
+                    required: true,
+                    minlength: 6,
+                    maxlength: 20
+                }
+            },
+            messages: {
+                adminName: {
+                    required: "请输入管理员账号",
+                    minlength: "账号至少2个字符",
+                    maxlength: "账号最多20个字符"
+                },
+                password: {
+                    required: "请输入密码",
+                    minlength: "密码至少6个字符",
+                    maxlength: "密码最多20个字符"
+                }
+            },
+            submitHandler: function(form) {
+                var $btn = $(form).find('button[type="submit"]').prop('disabled', true).text('登录中...');
+                $('#loginError').hide();
+                $.ajax({
+                    url: '/adminLogin',
+                    type: 'POST',
+                    data: $(form).serialize(),
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            window.location.href = res.redirectUrl;
+                        } else {
+                            $('#loginError').text(res.message || '用户名或密码错误').slideDown();
+                            $btn.prop('disabled', false).text('登录 →');
+                        }
+                    },
+                    error: function() {
+                        $('#loginError').text('网络错误，请稍后重试').slideDown();
+                        $btn.prop('disabled', false).text('登录 →');
+                    }
+                });
+            }
+        });
+
+        $(document).keypress(function(e) {
+            if (e.which == 13) {
+                $('#adminLoginForm').submit();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
