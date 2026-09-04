@@ -62,8 +62,9 @@ public class FileUploadUtil {
             return false;
         }
 
-        // 构建完整路径
-        Path fullPath = Paths.get(uploadDir, filePath);
+        // 去掉开头的 / 避免 Paths.get 将其视为绝对路径
+        String relativePath = filePath.startsWith("/") ? filePath.substring(1) : filePath;
+        Path fullPath = Paths.get(uploadDir, relativePath);
 
         try {
             return Files.deleteIfExists(fullPath);
