@@ -9,7 +9,9 @@ RUN mvn clean package -DskipTests
 
 # 第二阶段：运行
 FROM eclipse-temurin:8-jre
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "java -jar -Dserver.port=${PORT:-8080} app.jar"]
+ENTRYPOINT ["sh", "-c", "java -jar -Duser.timezone=Asia/Shanghai -Dserver.port=${PORT:-8080} app.jar"]
